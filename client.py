@@ -3,6 +3,11 @@ import pickle
 import cv2
 import struct
 
+# servers to be conected with
+server_address = {'server1': ('127.0.0.1', 12345)}
+# define category in which you would like to define data
+data_types = {'info': 0, 'data': 1, 'image': 2}
+
 
 def send_data(conn, data, data_type=0):
     '''
@@ -41,12 +46,6 @@ def receive_data(conn):
         reamining_payload_size = data_size - len(received_payload)
     data = pickle.loads(received_payload)
     return (data_type, data)
-
-
-# servers to be conected with
-server_address = {'server1': ('192.168.1.2', 12345)}
-# define category in which you would like to define data
-data_types = {'info': 0, 'data': 1, 'image': 2}
 
 
 def main():

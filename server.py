@@ -6,7 +6,7 @@ import cv2
 import struct
 
 # add only the devices you want to communicate with
-trusted_clients = {'192.168.1.2': 'client1'}
+trusted_clients = {'127.0.0.1': 'client1'}
 # define category in which you would like to define data
 data_types = {'info': 0, 'data': 1, 'image': 2}
 
@@ -61,7 +61,7 @@ def do_something(conn_name, data):
     '''
     print('Data number {} received from client {}'.format(
         data['data number'], conn_name))
-    time.sleep(0.2)
+    time.sleep(0.1)
     return 'Data number {} received on server'.format(data['data number'])
 
 
@@ -99,7 +99,7 @@ def main():
     # create server socket
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     port = 12345
-    server_socket.bind(('', port))
+    server_socket.bind(('127.0.0.1', port))
     server_socket.listen(5)
     print('---Server Started---')
 
