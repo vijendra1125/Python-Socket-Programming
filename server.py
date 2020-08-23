@@ -5,49 +5,44 @@ import pickle
 import cv2
 import struct
 
-# add only the devices you want to communicate with
-trusted_clients = {'127.0.0.1': 'client1'}
-# define category in which you would like to define data
-data_types = {'info': 0, 'data': 1, 'image': 2}
 
-
-def send_data(conn, data, data_type=0):
+def send_data(conn, payload, data_id=0):
     '''
-    @brief: send data along with data size type to the connection
+    @brief: send payload along with data size and data identifier to the connection
     @args[in]:
         conn: socket object for connection to which data is supposed to be sent
-        data: data to be sent
-        type: type of data to be sent
+        payload: payload to be sent
+        data_id: data identifier
     '''
-    # serialize data
-    serialized_data = pickle.dumps(data)
-    # send data size, data type and payload
-    conn.sendall(struct.pack('>I', len(serialized_data)))
-    conn.sendall(struct.pack('>I', data_type))
-    conn.sendall(serialized_data)
+    # serialize payload
+    serialized_payload = pickle.dumps(payload)
+    # send data size, data identifier and payload
+    conn.sendall(struct.pack('>I', len(serialized_payload)))
+    conn.sendall(struct.pack('>I', data_id))
+    conn.sendall(serialized_payload)
 
 
 def receive_data(conn):
     '''
     @brief: receive data from the connection assuming that 
         first 4 bytes represents data size,  
-        next 4 bytes represents data type and 
+        next 4 bytes represents data identifier and 
         successive bytes of the size 'data size'is payload
     @args[in]: 
         conn: socket object for conection from which data is supposed to be received
     '''
     # receive first 4 bytes of data as data size of payload
     data_size = struct.unpack('>I', conn.recv(4))[0]
-    # receive next 4 bytes of data as data type
-    data_type = struct.unpack('>I', conn.recv(4))[0]
+    # receive next 4 bytes of data as data identifier
+    data_id = struct.unpack('>I', conn.recv(4))[0]
     # receive payload till received payload size is equal to data_size received
     received_payload = b""
     reamining_payload_size = data_size
     while reamining_payload_size != 0:
         received_payload += conn.recv(reamining_payload_size)
         reamining_payload_size = data_size - len(received_payload)
-    data = pickle.loads(received_payload)
-    return (data_type, data)
+    payload = pickle.loads(received_payload)
+    return (data_id, payload)
 
 
 def do_something(conn_name, data):
@@ -73,26 +68,32 @@ def handle_client(conn, conn_name):
         con_name: name of the connection
     '''
     while True:
-        data_type, data = receive_data(conn)
-        # if data type is image then save the image
-        if data_type == data_types['image']:
+        data_id, payload = receive_data(conn)
+        # if data identifier is image then save the image
+        if data_id == data_identifiers['image']:
             print('---Recieved image too ---')
-            cv2.imwrite('server_data/received_image.png', data)
+            cv2.imwrite('server_data/received_image.png', payload)
             send_data(conn, 'Image received on server')
         # otherwise send the data to do something
-        elif data_type == data_types['data']:
-            response = do_something(conn_name, data)
+        elif data_id == data_identifiers['data']:
+            response = do_something(conn_name, payload)
             send_data(conn, response)
         else:
             # if data is 'bye' then break the loop and client connection will be closed
-            if data == 'bye':
+            if payload == 'bye':
                 print('{} requested to close the connection'.format(conn_name))
                 print('Closing connection with {}'. format(conn_name))
                 send_data(conn, 'You are disconnected from server now')
                 break
             else:
-                print(data)
+                print(payload)
     conn.close()
+
+
+# define identifiers for data which could be used to take certain action for data
+data_identifiers = {'info': 0, 'data': 1, 'image': 2}
+# key to trust a connection
+key_message = 'C0nn3c+10n'
 
 
 def main():
@@ -106,17 +107,19 @@ def main():
     while True:
         try:
             # accept client connection
-            # if its trusted  then handle it at seperate thread
-            # otherwise close connection imediately
+            # if first message from client match the defined message
+            # then handle it at seperate thread
+            # otherwise close the connection
             conn, (address, port) = server_socket.accept()
-            conn_name = '{}_{}'.format(trusted_clients[address], port)
-            if(address in list(trusted_clients.keys())):
-                print("ACCEPTED the connection from {}".format(conn_name))
+            conn_name = '{}|{}'.format(address, port)
+            print("Accepted the connection from {}".format(conn_name))
+            _, first_payload = receive_data(conn)
+            if first_payload == key_message:
+                print('Connection could be trusted, begining communication')
                 threading.Thread(target=handle_client,
                                  args=(conn, conn_name)).start()
             else:
-                print('REJECTING untrusted client with address {} and port {}'.format(
-                    address, port))
+                print('Accepted connection is an unknown client, closing the connection')
                 conn.close()
         # break the while loop when keyboard intterupt is received and server will be closed
         except KeyboardInterrupt:

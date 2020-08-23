@@ -3,76 +3,80 @@ import pickle
 import cv2
 import struct
 
-# servers to be conected with
-server_address = {'server1': ('127.0.0.1', 12345)}
-# define category in which you would like to define data
-data_types = {'info': 0, 'data': 1, 'image': 2}
 
-
-def send_data(conn, data, data_type=0):
+def send_data(conn, payload, data_id=0):
     '''
-    @brief: send data along with data size type to the connection
+    @brief: send payload along with data size and data identifier to the connection
     @args[in]:
         conn: socket object for connection to which data is supposed to be sent
-        data: data to be sent
-        type: type of data to be sent
+        payload: payload to be sent
+        data_id: data identifier
     '''
-    # serialize data
-    serialized_data = pickle.dumps(data)
-    # send data size, data type and payload
-    conn.sendall(struct.pack('>I', len(serialized_data)))
-    conn.sendall(struct.pack('>I', data_type))
-    conn.sendall(serialized_data)
+    # serialize payload
+    serialized_payload = pickle.dumps(payload)
+    # send data size, data identifier and payload
+    conn.sendall(struct.pack('>I', len(serialized_payload)))
+    conn.sendall(struct.pack('>I', data_id))
+    conn.sendall(serialized_payload)
 
 
 def receive_data(conn):
     '''
     @brief: receive data from the connection assuming that 
         first 4 bytes represents data size,  
-        next 4 bytes represents data type and 
+        next 4 bytes represents data identifier and 
         successive bytes of the size 'data size'is payload
     @args[in]: 
         conn: socket object for conection from which data is supposed to be received
     '''
     # receive first 4 bytes of data as data size of payload
     data_size = struct.unpack('>I', conn.recv(4))[0]
-    # receive next 4 bytes of data as data type
-    data_type = struct.unpack('>I', conn.recv(4))[0]
+    # receive next 4 bytes of data as data identifier
+    data_id = struct.unpack('>I', conn.recv(4))[0]
     # receive payload till received payload size is equal to data_size received
     received_payload = b""
     reamining_payload_size = data_size
     while reamining_payload_size != 0:
         received_payload += conn.recv(reamining_payload_size)
         reamining_payload_size = data_size - len(received_payload)
-    data = pickle.loads(received_payload)
-    return (data_type, data)
+    payload = pickle.loads(received_payload)
+    return (data_id, payload)
+
+
+# define category in which you would like to define data
+data_identifiers = {'info': 0, 'data': 1, 'image': 2}
+# key to be trusted by server
+key_message = 'C0nn3c+10n'
 
 
 def main():
     # create client socket object and connect it to server
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect(server_address['server1'])
+    conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    conn.connect(('127.0.0.1', 12345))
+    send_data(conn, key_message)
 
     # send a dictionary and image data in loop till keyboard interrupt is received
     data = {'data number': 0,
             'message': 'A new message has been arrived from client'}
     while True:
         try:
+            # send dict
             data['data number'] += 1
-            send_data(client_socket, data, data_types['data'])
-            print(receive_data(client_socket)[1])
+            send_data(conn, data, data_identifiers['data'])
+            print(receive_data(conn)[1])
+            # send image
             image = cv2.imread('client_data/sample_image.png', 0)
-            send_data(client_socket, image, data_types['image'])
-            print(receive_data(client_socket)[1])
+            send_data(conn, image, data_identifiers['image'])
+            print(receive_data(conn)[1])
         except KeyboardInterrupt:
-            print(receive_data(client_socket)[1])
+            print(receive_data(conn)[1])
             print('\n---Keyboard Interrupt received---')
             break
     # once keyboard interrupt is received, send signal to serer for closing connection
     # and close client socket
-    send_data(client_socket, 'bye')
-    print(receive_data(client_socket)[1])
-    client_socket.close()
+    send_data(conn, 'bye')
+    print(receive_data(conn)[1])
+    conn.close()
 
 
 if __name__ == '__main__':
