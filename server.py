@@ -68,25 +68,29 @@ def handle_client(conn, conn_name):
         con_name: name of the connection
     '''
     while True:
-        data_id, payload = receive_data(conn)
-        # if data identifier is image then save the image
-        if data_id == data_identifiers['image']:
-            print('---Recieved image too ---')
-            cv2.imwrite('server_data/received_image.png', payload)
-            send_data(conn, 'Image received on server')
-        # otherwise send the data to do something
-        elif data_id == data_identifiers['data']:
-            response = do_something(conn_name, payload)
-            send_data(conn, response)
-        else:
-            # if data is 'bye' then break the loop and client connection will be closed
-            if payload == 'bye':
-                print('{} requested to close the connection'.format(conn_name))
-                print('Closing connection with {}'. format(conn_name))
-                send_data(conn, 'You are disconnected from server now')
-                break
+        try:
+            data_id, payload = receive_data(conn)
+            # if data identifier is image then save the image
+            if data_id == data_identifiers['image']:
+                print('---Recieved image too ---')
+                cv2.imwrite('server_data/received_image.png', payload)
+                send_data(conn, 'Image received on server')
+            # otherwise send the data to do something
+            elif data_id == data_identifiers['data']:
+                response = do_something(conn_name, payload)
+                send_data(conn, response)
             else:
-                print(payload)
+                # if data is 'bye' then break the loop and client connection will be closed
+                if payload == 'bye':
+                    print(
+                        '[INFO]: {} requested to close the connection'.format(conn_name))
+                    print('[INFO]: Closing connection with {}'. format(conn_name))
+                    send_data(conn, 'You are disconnected from server now')
+                    break
+                else:
+                    print(payload)
+        except:
+            print('[WARNING]: There was some issue with connection')
     conn.close()
 
 
@@ -102,7 +106,7 @@ def main():
     port = 12345
     server_socket.bind(('127.0.0.1', port))
     server_socket.listen(5)
-    print('---Server Started---')
+    print('[INFO]: Server Started')
 
     while True:
         try:
@@ -112,22 +116,25 @@ def main():
             # otherwise close the connection
             conn, (address, port) = server_socket.accept()
             conn_name = '{}|{}'.format(address, port)
-            print("Accepted the connection from {}".format(conn_name))
-            _, first_payload = receive_data(conn)
+            print("[INFO]: Accepted the connection from {}".format(conn_name))
+            first_payload = receive_data(conn)[1]
             if first_payload == key_message:
-                print('Connection could be trusted, begining communication')
+                print('Connection could be trusted, rejecting communication')
+                send_data(conn, 'Connection accepted')
                 threading.Thread(target=handle_client,
                                  args=(conn, conn_name)).start()
             else:
-                print('Accepted connection is an unknown client, closing the connection')
+                print('[WARNING]: Accepted connection is an unknown client, \
+                      closing the connection')
+                send_data(conn, 'You are not authorized')
                 conn.close()
         # break the while loop when keyboard intterupt is received and server will be closed
         except KeyboardInterrupt:
-            print('\n---Keyboard Interrupt Received---')
+            print('\n[INFO]: Keyboard Interrupt Received')
             break
 
     server_socket.close()
-    print('---Server Closed---')
+    print('[INFO]: Server Closed')
 
 
 if __name__ == '__main__':

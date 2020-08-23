@@ -47,6 +47,9 @@ def receive_data(conn):
 data_identifiers = {'info': 0, 'data': 1, 'image': 2}
 # key to be trusted by server
 key_message = 'C0nn3c+10n'
+# a sample dictionary data
+data = {'data number': 0,
+        'message': 'A new message has been arrived from client'}
 
 
 def main():
@@ -54,29 +57,31 @@ def main():
     conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     conn.connect(('127.0.0.1', 12345))
     send_data(conn, key_message)
-
-    # send a dictionary and image data in loop till keyboard interrupt is received
-    data = {'data number': 0,
-            'message': 'A new message has been arrived from client'}
-    while True:
-        try:
-            # send dict
-            data['data number'] += 1
-            send_data(conn, data, data_identifiers['data'])
-            print(receive_data(conn)[1])
-            # send image
-            image = cv2.imread('client_data/sample_image.png', 0)
-            send_data(conn, image, data_identifiers['image'])
-            print(receive_data(conn)[1])
-        except KeyboardInterrupt:
-            print(receive_data(conn)[1])
-            print('\n---Keyboard Interrupt received---')
-            break
-    # once keyboard interrupt is received, send signal to serer for closing connection
-    # and close client socket
-    send_data(conn, 'bye')
-    print(receive_data(conn)[1])
+    first_payload = receive_data(conn)[1]
+    if first_payload == 'You are not authorized':
+        print('[ERROR]: Access denied')
+    else:
+        # send a dictionary data and image data in loop till keyboard interrupt is received
+        while True:
+            try:
+                # send dict
+                data['data number'] += 1
+                send_data(conn, data, data_identifiers['data'])
+                print(receive_data(conn)[1])
+                # send image
+                image = cv2.imread('client_data/sample_image.png', 0)
+                send_data(conn, image, data_identifiers['image'])
+                print(receive_data(conn)[1])
+            except KeyboardInterrupt:
+                print(receive_data(conn)[1])
+                print('\n[INFO]: Keyboard Interrupt received')
+                break
+        # once keyboard interrupt is received, send signal to server for closing connection
+        send_data(conn, 'bye')
+        print(receive_data(conn)[1])
+    # close connection
     conn.close()
+    print('[INFO]: Connection closed')
 
 
 if __name__ == '__main__':
