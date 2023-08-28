@@ -8,6 +8,8 @@
 
 A sample socket programming in python using low level networking interface module [socket](https://docs.python.org/3.3/library/socket.html).
 
+Inside 'cam_streaming' directory one could the variant of client and server script which reads the cam data and on client side and send it to server. Then server could show up to two stream for received cam images. Among the two stream, for one stream latency could be added. Check config file inside cam_streaming directory to set the configuration. 
+
 ## Instructions
 
 * Create conda environment with required dependencies by running:
