@@ -15,7 +15,7 @@ Inside 'cam_streaming' directory one could the variant of client and server scri
 * Create conda environment with required dependencies by running:
 
   ```bash
-  conda create --name socket_prog --file conda_env_export.yml
+  conda env create --name socket_prog --file conda_env_export.yml
   ```
 
 * Run server first and then client.
