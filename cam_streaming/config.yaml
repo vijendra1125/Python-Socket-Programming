@@ -16,8 +16,13 @@ server:
   latency: 0.2
   # maximum number of frames which should be accumulated in buffer before all frames as dropped
   cam_buffer_len: 1000
+
 client:
+  # if True then image from cam will be resized before sending
   resize_image: False
+  # width of the resized image
   resized_width: 1024
+  # height of the resized image
   resized_height: 512
+  # if true the cam image will be converted to grayscale before sending
   grayscale: False
