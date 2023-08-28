@@ -83,7 +83,7 @@ def main(config):
                 send_data(conn, "bye")
     # close connection
     conn.close()
-    print("[INFO]: Connection closed")
+    # print("[INFO]: Connection closed")
 
 
 if __name__ == "__main__":
