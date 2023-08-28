@@ -45,14 +45,6 @@ def receive_data(conn):
     return (data_id, payload)
 
 
-# define category in which you would like to define data
-data_identifiers = {"info": 0, "data": 1, "image": 2}
-# key to be trusted by server
-key_message = "C0nn3c+10n"
-# a sample dictionary data
-data = {"data number": 0, "message": "A new message has been arrived from client"}
-
-
 def main(config):
     # create client socket object and connect it to server
     conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -70,10 +62,6 @@ def main(config):
             sys.exit()
         while True:
             try:
-                # send dict
-                data["data number"] += 1
-                send_data(conn, data, config["data_identifiers"]["data"])
-                print(receive_data(conn)[1])
                 # send image
                 ret, frame = cap.read()
                 if not ret:
@@ -88,7 +76,7 @@ def main(config):
                     if config["client"]["grayscale"]:
                         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
                     send_data(conn, frame, config["data_identifiers"]["image"])
-                    print(receive_data(conn)[1])
+                    # print(receive_data(conn)[1])
             except KeyboardInterrupt:
                 print("\n[INFO]: Keyboard Interrupt received")
                 # once keyboard interrupt is received, send signal to server for closing connection

@@ -47,22 +47,6 @@ def receive_data(conn):
     return (data_id, payload)
 
 
-def do_something(conn_name, data):
-    """
-    @beief: a sample function to do something with received data
-    @args[in]:
-        conn_name: connection name from where dat is received
-        data: received data
-    @args[out]:
-        a string response
-    """
-    print(
-        "Data number {} received from client {}".format(data["data number"], conn_name)
-    )
-    time.sleep(0.1)
-    return "Data number {} received on server".format(data["data number"])
-
-
 def handle_client(conn, conn_name, config):
     """
     @brief: handle the connection from client at seperate thread
@@ -92,10 +76,6 @@ def handle_client(conn, conn_name, config):
                     timer = current_time
             # send response to client
             send_data(conn, "Image received on server")
-        elif data_id == config["data_identifiers"]["data"]:
-            # otherwise send the data to do something
-            response = do_something(conn_name, payload)
-            send_data(conn, response)
         else:
             # if data is 'bye' then break the loop and client connection will be closed
             if payload == "bye":
