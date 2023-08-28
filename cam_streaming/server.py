@@ -53,6 +53,7 @@ def handle_client(conn, conn_name, config):
     @args[in]:
         conn: socket object of connection
         con_name: name of the connection
+        config: configuration
     """
     cam_buffer = []
     timer = time.time()
