@@ -71,7 +71,10 @@ def main(config):
                     if config["client"]["resize_image"]:
                         frame = cv2.resize(
                             frame,
-                            (config["client"]["height"], config["client"]["width"]),
+                            (
+                                config["client"]["resized_width"],
+                                config["client"]["resized_height"],
+                            ),
                         )
                     if config["client"]["grayscale"]:
                         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)

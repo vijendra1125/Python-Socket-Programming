@@ -18,6 +18,6 @@ server:
   cam_buffer_len: 1000
 client:
   resize_image: False
-  resized_width: 512
+  resized_width: 1024
   resized_height: 512
   grayscale: False
