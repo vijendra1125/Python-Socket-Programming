@@ -1,0 +1,23 @@
+ip: "127.0.0.1"
+port: 12345
+# key to trust a connection
+key_message: "C0nn3c+10n"
+# define identifiers for data which could be used to take certain action for data
+data_identifiers: 
+  info: 0
+  data: 1
+  image: 2
+server:
+  #if true then visualization of streamed cam without latency will be done
+  show_normal_cam: True
+  #if true then visualization of streamed cam with latency will be done
+  show_cam_with_latency: True
+  # latency between visualization of two consecutive frame
+  latency: 0.2
+  # maximum number of frames which should be accumulated in buffer before all frames as dropped
+  cam_buffer_len: 1000
+client:
+  resize_image: False
+  resized_width: 512
+  resized_height: 512
+  grayscale: False
