@@ -7,6 +7,10 @@
 A sample socket programming in python using low level networking interface module [socket](https://docs.python.org/3.3/library/socket.html). 
 
 ## Instructions
+* Create conda environment with required dependedncies by running:
+  ```bash
+  conda create --name socket_prog --file conda_env_export.yml
+  ```
 * Run server first and then client.
 * To close connection, give keyboard interrupt to client, server will close automatically.
 
