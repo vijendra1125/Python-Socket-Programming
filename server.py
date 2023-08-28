@@ -137,7 +137,7 @@ def main():
             break
 
     server_socket.close()
-    print("[INFO]: Server Closed")
+    # print("[INFO]: Server Closed")
 
 
 if __name__ == "__main__":
