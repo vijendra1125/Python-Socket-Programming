@@ -6,11 +6,11 @@
 
 ## About
 
-A sample socket programming in python using low level networking interface module [socket](https://docs.python.org/3.3/library/socket.html). 
+A sample socket programming in python using low level networking interface module [socket](https://docs.python.org/3.3/library/socket.html).
 
 ## Instructions
 
-* Create conda environment with required dependedncies by running:
+* Create conda environment with required dependencies by running:
 
   ```bash
   conda create --name socket_prog --file conda_env_export.yml
@@ -32,6 +32,6 @@ You will find follwing on top of vanilla implementation you find in any first tu
 
 ## Notes
 
-* Program is wrtten in python 3.7.4
+* Program is written in python 3.7.4
 
 > ***Feel free to request more feature you would like, i wil try to add it when i get time***
